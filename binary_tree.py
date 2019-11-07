@@ -67,7 +67,7 @@ def search(root, key):
         else:
             return search(root.right, key)
 
-def main():
+def main():  # eventually make this a tree function that you call elsewhere 
     """
     creates a binary search tree from an imported data set
     """
