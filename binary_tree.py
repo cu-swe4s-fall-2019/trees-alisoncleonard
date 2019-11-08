@@ -1,5 +1,6 @@
 import csv
 
+
 class Node:
     def __init__(self, key, value=None, left=None, right=None):
         """
@@ -38,6 +39,7 @@ def insert(root, key, value=None):
             insert(root.right, key, value)
     return root
 
+
 def search(root, key):
     """
     Search for the node with specified key
@@ -51,7 +53,6 @@ def search(root, key):
     -------
         The node with this key
     """
-
     if key == root.key:
         return root.value
     elif key < root.key:
@@ -67,27 +68,21 @@ def search(root, key):
         else:
             return search(root.right, key)
 
-def main():
+
+def create_tree(datafile):
     """
     creates a binary search tree from an imported data set
     """
 
-    file = 'commasep_testdata.csv'
+    file = datafile
 
     isfirstline = True
     for line in open(file, 'r'):
-        data = line.rstrip().split(',')
-        # print(data[0])
-        # print(data[1])
+        data = line.rstrip().split('\t')
         if isfirstline is True:
             datatree = Node(data[0], data[1])
             isfirstline = False
         else:
             insert(datatree, data[0], data[1])
 
-    result = search(datatree,'8')
-    print('the value of 8 is ' + str(result))
-
-
-if __name__ == '__main__':
-    main()
+    return datatree
