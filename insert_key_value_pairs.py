@@ -2,7 +2,10 @@
 Main file to compare different data structures for storing key, value pairs
 """
 import argparse
+import sys
 import binary_tree
+sys.path.insert(1, './hash-tables-alisoncleonard')
+import hash_tables as ht
 import time
 
 
@@ -39,9 +42,23 @@ def main():
     datastructure = args.datastructure
     filename = args.dataset
 
-    if datastructure is 'hash':
+    if datastructure == 'hash':
         # call hash tables submodule
-        pass
+        hashtable = ht.ChainedHash(10000000, ht.hash_functions.h_rolling)
+        # measure time to insert all keys in file
+        insert_t0 = time.time()
+        for line in open(filename, 'r'):
+            data = line.rstrip().split('\t')
+            hashtable.add(data[0], data[1])
+        insert_t1 = time.time()
+        # measure time to search for all keys
+        search_t0 = time.time()
+        for line in open(filename, 'r'):
+            data = line.rstrip().split('\t')
+            hashtable.search(data[0])
+        search_t1 = time.time()
+        print('time to insert: ' + str(insert_t1 - insert_t0))
+        print('time to search: ' + str(search_t1 - search_t0))
 
     elif datastructure == 'binary_tree':
         # call binary_tree tree function
@@ -58,7 +75,7 @@ def main():
         print('time to insert: ' + str(insert_t1 - insert_t0))
         print('time to search: ' + str(search_t1 - search_t0))
 
-    elif datastructure is 'avl_tree':
+    elif datastructure == 'avl_tree':
         # call avl_tree tree function
         pass
 

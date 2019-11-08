@@ -10,8 +10,11 @@ before_install:
     - conda activate test
     - conda install --yes python=3.6
     - conda install -y pycodestyle
+    - git submodule update --init
 
 script:
     - python insert_key_value_pairs.py --datastructure 'binary_tree' --dataset 'sorted_keys.txt'
     - python insert_key_value_pairs.py --datastructure 'binary_tree' --dataset 'random_keys.txt'
+    - python insert_key_value_pairs.py --datastructure 'hash' --dataset
+    'random_keys.txt'
     - python test_trees.py
