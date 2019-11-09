@@ -1,3 +1,7 @@
+"""
+Module to build and search through an AVL tree
+"""
+
 import csv
 
 
@@ -13,6 +17,10 @@ class Node:
             left: the left child of the node
             right: the right child of the node
 
+        Returns
+        -------
+        A node
+
         """
         self.key = key
         self.value = value
@@ -23,9 +31,16 @@ class Node:
 def insert(root, key, value=None):
     """
     Inserts a node into the tree. Works down from the root.
+
+    Parameters
+    ----------
+    root: the tree to insert into. called root because the function will start
+    at the root of this tree, and then work its way down comparing to
+    successive nodes
+    key: the key to insert from a key, value pair
+    value: the value to insert from a key, value pair
     """
-    # print('type root.key ' + str(type(root.key)))
-    # print('type key ' + str(type(key))) --> both strings, all good
+
     if key < root.key:
         if root.left is None:
             root.left = Node(key, value)  # create node here
@@ -69,14 +84,25 @@ def search(root, key):
             return search(root.right, key)
 
 
-def create_tree(datafile):
+def create_tree(datafile, N):
     """
     creates a binary search tree from an imported data set
+
+    Parameters
+    ----------
+    datafile: a tab-separated txt file containing key, value pairs
+    N: the number of keys to insert from the file, starting from the top
+
+    Returns
+    -------
+    A tree containing the specified number of key, value pairs
+
     """
 
     file = datafile
 
     isfirstline = True
+    counter = 0
     for line in open(file, 'r'):
         data = line.rstrip().split('\t')
         if isfirstline is True:
@@ -84,5 +110,8 @@ def create_tree(datafile):
             isfirstline = False
         else:
             insert(datatree, data[0], data[1])
+        counter += 1
+        if counter == N:
+            break
 
     return datatree

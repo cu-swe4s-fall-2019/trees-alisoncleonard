@@ -13,8 +13,10 @@ before_install:
     - git submodule update --init
 
 script:
-    - python insert_key_value_pairs.py --datastructure 'binary_tree' --dataset 'sorted_keys.txt'
-    - python insert_key_value_pairs.py --datastructure 'binary_tree' --dataset 'random_keys.txt'
+    - python insert_key_value_pairs.py --datastructure 'binary_tree' --dataset 'sorted_keys.txt' --number_keys 1000
+    - python insert_key_value_pairs.py --datastructure 'binary_tree' --dataset 'random_keys.txt' --number_keys 1000
     - python insert_key_value_pairs.py --datastructure 'hash' --dataset
-    'random_keys.txt'
+    'random_keys.txt' --number_keys 1000
+    - python insert_key_value_pairs.py --datastructure 'avl_tree' --dataset 'random_keys.txt' --number_keys 1000
     - python test_trees.py
+    - bash trees_test.sh

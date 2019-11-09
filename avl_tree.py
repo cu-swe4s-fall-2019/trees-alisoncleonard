@@ -1,7 +1,13 @@
+"""
+Module to build and search through an AVL tree
+"""
+
 import csv
 
+
 class Node:
-    def __init__(self, key, value=None, left=None, right=None):
+    def __init__(self, key, value=None, parent=None, left=None, right=None,
+                 height=-1):
         """
         creates a node
 
@@ -12,159 +18,118 @@ class Node:
             left: the left child of the node
             right: the right child of the node
 
+        Returns
+        -------
+        A node
+
         """
         self.key = key
+        self.parent = parent
         self.value = value
         self.left = left
         self.right = right
+        self.height = height
+
+
+def update_height(node):
+    """
+    Updates the value of self.height for a given node
+    """
+    if node.left is None:
+        node.height = node.right.height + 1
+    elif node.right is None:
+        node.height = node.left.height + 1
+    else:
+        node.height = max(node.left.height, node.right.height) + 1
 
 
 def insert(root, key, value=None):
     """
     Inserts a node into the tree. Works down from the root.
+
+    Parameters
+    ----------
+    root: the tree to insert into. called root because the function will start
+    at the root of this tree, and then work its way down comparing to
+    successive nodes
+    key: the key to insert from a key, value pair
+    value: the value to insert from a key, value pair
     """
-    # print('type root.key ' + str(type(root.key)))
-    # print('type key ' + str(type(key))) --> both strings, all good
+
     if key < root.key:
         if root.left is None:
             root.left = Node(key, value)  # create node here
+            root.left.parent = root.key
         else:
             # try insert again at the next node down
             insert(root.left, key, value)
+            update_height(root)
     else:
         if root.right is None:
             root.right = Node(key, value)
+            root.right.parent = root.key
         else:
             insert(root.right, key, value)
+            update_height(root)
     return root
 
-def rebalance(tree):
+
+def left_rotate(node):
     """
-    check tree's balance after inserting a node
+    Perform a left rotation from a specified node when the tree is unbalanced
     """
-    # update height and balance of tree
-    update_heights(tree, recursive=False)
-    update_balances(tree, False)
+    y = node.right
+    y.parent = node.parent
+    if y.parent.left is node:
+        y.parent.left = y
+    elif y.parent.right is node:
+        y.parent.right = y
+    node.right = y.left
+    node.right.parent = node
+    y.left = node
+    node.parent = y
+    update_height(node)
+    update_height(y)
 
-    # For each node checked,
-        #   if the balance factor remains −1, 0, or +1 then no rotations are necessary.
-    while tree.balance < -1 or tree.balance > 1:
-        # Left subtree is larger than right subtree
-        if tree.balance > 1:
 
-            # Left Right Case -> rotate y,z to the left
-            if tree.node.left.balance < 0:
-                #     x               x
-                #    / \             / \
-                #   y   D           z   D
-                #  / \        ->   / \
-                # A   z           y   C
-                #    / \         / \
-                #   B   C       A   B
-                tree.node.left.rotate_left()
-                tree.update_heights()
-                tree.update_balances()
-
-            # Left Left Case -> rotate z,x to the right
-            #       x                 z
-            #      / \              /   \
-            #     z   D            y     x
-            #    / \         ->   / \   / \
-            #   y   C            A   B C   D
-            #  / \
-            # A   B
-            tree.rotate_right()
-            tree.update_heights()
-            tree.update_balances()
-
-        # Right subtree is larger than left subtree
-        if tree.balance < -1:
-
-            # Right Left Case -> rotate x,z to the right
-            if tree.node.right.balance > 0:
-                #     y               y
-                #    / \             / \
-                #   A   x           A   z
-                #      / \    ->       / \
-                #     z   D           B   x
-                #    / \                 / \
-                #   B   C               C   D
-                tree.node.right.rotate_right() # we're in case III
-                tree.update_heights()
-                tree.update_balances()
-
-            # Right Right Case -> rotate y,x to the left
-            #       y                 z
-            #      / \              /   \
-            #     A   z            y     x
-            #        / \     ->   / \   / \
-            #       B   x        A   B C   D
-            #          / \
-            #         C   D
-            tree.rotate_left()
-            tree.update_heights()
-            tree.update_balances()
-
-def update_heights(tree, recursive=True): # update heights for whole tree
+def right_rotate(node):
     """
-    Update tree height
-
-    Tree height is max height of either left or right subtrees +1 for root of the tree
+    Perform a right rotation from a specified node when the tree is unbalanced
     """
-    if tree.node:
-        if recursive:
-            if tree.node.left:
-                tree.node.left.update_heights()
-            if tree.node.right:
-                tree.node.right.update_heights()
+    y = node.left
+    y.parent = node.parent
+    if y.parent.left is node:
+        y.parent.left = y
+    elif y.parent.right is node:
+        y.parent.right = y
+    node.left = y.right
+    node.left.parent = node
+    y.right = node
+    node.parent = y
+    update_height(node)
+    update_height(y)
 
-        height = 1 + max(tree.node.left.height, tree.node.right.height)
-    else:
-        height = -1
 
-def update_balances(tree, recursive=True):
+def rebalance(node):
     """
-    Calculate tree balance factor
-
-    The balance factor is calculated as follows:
-        balance = height(left subtree) - height(right subtree).
+    Rebalance the tree. Compares the heights of two child nodes to determine
+    what rotation is needed
     """
-    if tree.node:
-        if recursive:
-            if tree.node.left:
-                tree.node.left.update_balances()
-            if tree.node.right:
-                tree.node.right.update_balances()
+    while node is not None:
+        if node.left.height >= 2 + node.right.height:
+            if node.left.left.height >= node.left.right:
+                right_rotate(node)
+            else:
+                left_rotate(node.left)
+                right_rotate(node)
+        elif node.right.height >= 2 + node.left.height:
+            if node.right.right.height >= node.right.left:
+                left_rotate(node)
+            else:
+                right_rotate(node.right)
+                left_rotate(node.right)
+        node = node.parent
 
-        balance = tree.node.left.height - tree.node.right.height
-    else:
-        balance = 0
-
-def rotate_right(tree):
-    """
-    Right rotation
-        set self as the right subtree of left subree
-    """
-    new_root = tree.node.left.node
-    new_left_sub = new_root.right.node
-    old_root = tree.node
-
-    tree.node = new_root
-    old_root.left.node = new_left_sub
-    new_root.right.node = old_root
-
-def rotate_left(self):
-    """
-    Left rotation
-        set self as the left subtree of right subree
-    """
-    new_root = tree.node.right.node
-    new_left_sub = new_root.left.node
-    old_root = tree.node
-
-    tree.node = new_root
-    old_root.right.node = new_left_sub
-    new_root.left.node = old_root
 
 def search(root, key):
     """
@@ -179,7 +144,6 @@ def search(root, key):
     -------
         The node with this key
     """
-
     if key == root.key:
         return root.value
     elif key < root.key:
@@ -196,30 +160,34 @@ def search(root, key):
             return search(root.right, key)
 
 
-def main():
+def create_AVLtree(datafile, N):
     """
-    creates an AVL tree from an imported data set
+    creates an AVL search tree from an imported data set
+
+    Parameters
+    ----------
+    datafile: a tab-separated txt file containing key, value pairs
+    N: the number of keys to insert from the file, starting from the top
+
+    Returns
+    -------
+    A tree containing the specified number of key, value pairs
+
     """
 
-    file = 'commasep_testdata.csv'
+    file = datafile
 
     isfirstline = True
+    counter = 0
     for line in open(file, 'r'):
-        data = line.rstrip().split(',')
-        # print(data[0])
-        # print(data[1])
+        data = line.rstrip().split('\t')
         if isfirstline is True:
             datatree = Node(data[0], data[1])
             isfirstline = False
-            height = -1
-            balance = 0
         else:
             insert(datatree, data[0], data[1])
-            rebalance(datatree)
+        counter += 1
+        if counter == N:
+            break
 
-    result = search(datatree,'8')
-    print('the value of 8 is ' + str(result))
-
-
-if __name__ == '__main__':
-    main()
+    return datatree
