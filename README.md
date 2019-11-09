@@ -39,3 +39,12 @@ $ python insert_key_value_pairs.py --datastructure 'binary_tree' --dataset 'tabs
 - git submodule update --init
 
 ## Summary of benchmarking results between data structures
+
+![](benchmark_graph.png)
+
+This script timed how long it took to insert data and then search for it in a
+hash table, a binary tree, and an AVL tree. Hash tables were particularly slow
+to insert data compared to either tree over a small number of keys, but as
+trees became slower as the number of keys increased they became comparable to
+trees. There is likely something wrong with my AVL tree rebalancing function
+because my implementation is not faster than binary trees. 
